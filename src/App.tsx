@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import TodoItem from './components/todos-item';
+import { toast } from 'sonner';
 
 const App = () => {
   const [todos, setTodos] = useState<any[]>([]);
@@ -37,6 +38,8 @@ const App = () => {
     setTodos(updatedList);
     setInputValue("");
 
+    toast.success('New task added successfully!');
+
     console.log("➕ Added Task:");
     console.table([newTodo]);
   };
@@ -48,12 +51,21 @@ const App = () => {
     setTodos(updatedList);
 
     const changedItem = updatedList.find(t => t.id === id);
+
+    if (changedItem.completed) {
+      toast.info('Task marked as completed! 🎉');
+    } else {
+      toast('Task moved back to pending.');
+    }
+
     console.log(`🔄 Item "${changedItem.title}" is now ${changedItem.completed ? "DONE" : "PENDING"}`);
   };
 
   const deleteTodo = (id: any) => {
     const filteredList = todos.filter((item: any) => item.id !== id);
     setTodos(filteredList);
+
+    toast.error('Task has been deleted.');
 
     console.warn("🗑️ Item Deleted. Remaining tasks:");
     console.table(filteredList);
