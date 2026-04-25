@@ -1,10 +1,10 @@
 import type React from "react";
 
-const CounterControls = ({ count, setCount } : { count: number, setCount: React.Dispatch<React.SetStateAction<number>>}) => {
+const CounterControls = ({ count, setCount }: { count: number, setCount: React.Dispatch<React.SetStateAction<number>> }) => {
   return (
     <div className="flex flex-col gap-6 items-center">
       <div className="flex gap-6 justify-center items-center">
-        {/* Decrement Button */}
+
         {count > 0 ? (
           <button
             onClick={() => setCount((prev) => prev - 1)}
@@ -16,7 +16,6 @@ const CounterControls = ({ count, setCount } : { count: number, setCount: React.
           <span className="text-red-600 font-bold">Min Reached!</span>
         )}
 
-        {/* Increment Button */}
         {count < 10 ? (
           <button
             onClick={() => setCount((prev) => prev + 1)}
@@ -29,7 +28,6 @@ const CounterControls = ({ count, setCount } : { count: number, setCount: React.
         )}
       </div>
 
-      {/* Reset Button */}
       {count > 0 && (
         <button
           onClick={() => setCount(0)}

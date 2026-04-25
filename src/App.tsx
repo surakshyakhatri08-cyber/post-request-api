@@ -16,11 +16,9 @@ function App() {
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen transition-all duration-500 ${bgColor}`}>
       <div className="bg-white p-12 rounded-[2.5rem] shadow-2xl text-center">
-        
-        {/* Number ra Text Preview yahan bata aauchha */}
+
         <CounterDisplay count={count} text={text} />
-        
-        {/* Buttons ra Input yahan bata aauchha */}
+      
         <div className="flex flex-col gap-6 items-center">
           <CounterControls count={count} setCount={setCount} />
           <TextInput text={text} setText={setText} />
