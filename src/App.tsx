@@ -1,75 +1,91 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { postSchema } from "./components/form-schema";
-import type { PostFormData } from "./components/form-schema";
-import { FieldGroup } from "./components/form-field";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { postSchema } from './components/form-schema';
+import type { PostFormData } from './components/form-schema';
+import { FieldGroup } from './components/form-field';
 
-const UserForm = () => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<PostFormData>({
-    resolver: zodResolver(postSchema),
+const Spinner = () => (
+  <svg
+    className="animate-spin h-4 w-4 text-white inline-block mr-2"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+  </svg>
+);
+
+const PostForm = () => {
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<PostFormData>({
+    resolver: zodResolver(postSchema) as any,
   });
 
-const onSubmit = async (data: PostFormData) => {
+  const onSubmit: SubmitHandler<PostFormData> = async (data) => {
+    setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));     
-      console.log("Post Data:", data);
+      const response = await axios.post('https://dummyjson.com/posts/add', data);
+      const newPost = response.data;
 
-      toast.success("Post published successfully!");
+      console.log('API Response:', newPost);
 
+      toast.success(`Post #${newPost.id} created successfully!`, {
+        description: `"${newPost.title}" has been published.`,
+      });
       reset();
-    } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error('Submission failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex items-center justify-center p-4 font-sans text-white">
-  
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md space-y-6">
-        <h2 className="text-3xl font-bold mb-8 text-white">Create Post</h2>
-
-        <FieldGroup 
-          icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>} 
+    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg border mt-10">
+      <h2 className="text-xl font-bold mb-4">Add New Post</h2>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FieldGroup
+          label="Title"
+          register={register('title')}
           error={errors.title}
+          disabled={loading}
+        />
+        <FieldGroup
+          label="Body"
+          register={register('body')}
+          error={errors.body}
+          isTextArea
+          disabled={loading}
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
         >
-          <input
-            {...register("title")}
-            placeholder="Title"
-            className="w-full bg-[#2a2a2a] p-3 rounded-xl border-none focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-500"
-          />
-        </FieldGroup>
-
-        <FieldGroup 
-          alignStart
-          icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6"/><line x1="15" y1="12" x2="3" y2="12"/><line x1="17" y1="18" x2="3" y2="18"/></svg>} 
-          error={errors.content}
-        >
-          <textarea
-            {...register("content")}
-            placeholder="Write your content..."
-            rows={6}
-            className="w-full bg-[#2a2a2a] p-3 rounded-xl border-none focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-500 resize-none"
-          />
-        </FieldGroup>
-
-        <div className="flex flex-col sm:flex-row gap-4 pt-6">
-          <button
-            type="button"
-            className="flex-1 py-4 border-2 border-gray-700 rounded-full font-semibold text-white hover:bg-gray-800 transition order-2 sm:order-1"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="flex-1 py-4 bg-blue-500 rounded-full font-semibold text-white hover:bg-blue-600 transition shadow-lg shadow-blue-500/20 order-1 sm:order-2"
-          >
-            Publish Post
-          </button>
-        </div>
+          {loading ? (
+            <>
+              <Spinner />
+              Submitting...
+            </>
+          ) : (
+            'Submit Post'
+          )}
+        </button>
       </form>
     </div>
   );
 };
 
-export default UserForm;
+export default PostForm;
